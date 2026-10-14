@@ -35,11 +35,11 @@ Trạng thái: Chưa triển khai. Đường dẫn trong các task là tương �
 
 **Interfaces:** Backend exports `createApp()` cho Supertest; entrypoint server chỉ đọc env/khởi động. Frontend dùng `VITE_API_BASE_URL`; production gọi API cùng origin.
 
-- [ ] Tạo repository mới và thư mục backend/frontend; giữ nguyên các tài liệu đã xuất.
-- [ ] Cấu hình TypeScript và scripts backend/frontend `dev`, `build`, `test`, `typecheck`; backend thêm `start`.
-- [ ] Tạo Express app với error middleware và frontend shell; validate cấu hình đầu vào, không log secrets.
-- [ ] Chạy `npm ci`, `npm run typecheck`, `npm run build` tại từng thư mục; build exit 0 và server báo lỗi rõ khi thiếu cấu hình bắt buộc.
-- [ ] Commit: `chore: initialize standalone APK update platform`.
+- [x] Tạo repository mới và thư mục backend/frontend; giữ nguyên các tài liệu đã xuất.
+- [x] Cấu hình TypeScript và scripts backend/frontend `dev`, `build`, `test`, `typecheck`; backend thêm `start`.
+- [x] Tạo Express app với error middleware và frontend shell; validate cấu hình đầu vào, không log secrets.
+- [x] Chạy `npm ci`, `npm run typecheck`, `npm run build` tại từng thư mục; build exit 0 và server báo lỗi rõ khi thiếu cấu hình bắt buộc.
+- [x] Commit: `chore: initialize standalone APK update platform` (`41fd4d9`); cache build được dọn ở `93efbbf`.
 
 ## Task 2 — PostgreSQL, migration và Docker Compose
 
@@ -47,13 +47,13 @@ Trạng thái: Chưa triển khai. Đường dẫn trong các task là tương �
 
 **Interfaces:** `DATABASE_URL`, `SESSION_SECRET`, `PUBLIC_BASE_URL`, `APK_STORAGE_DIR`, `MAX_APK_BYTES` (mặc định 536870912), `ADMIN_ORIGIN`; scripts `db:migrate`, `db:rollback`, `test:integration`. Compose có postgres/migrate/api và volumes độc lập.
 
-- [ ] Viết integration tests khởi tạo schema từ DB trống, chạy lại không thay dữ liệu, unique/FK, rollback/reapply; xác nhận thất bại khi chưa có migration.
-- [ ] Viết migration cho admin_users, admin_sessions, apps, releases, admin_api_tokens cùng constraint/index trong spec.
-- [ ] Cấu hình migrate đợi PostgreSQL healthy, API đợi migrate exit 0; readiness truy vấn DB và schema version.
-- [ ] Tạo môi trường test với DB/volume riêng; test không reset hoặc xóa DB ứng dụng.
-- [ ] Chạy `docker compose -f backend/docker-compose.yml up --build -d`; readiness trả thành công. Chạy `npm run test:integration` tại backend; tất cả migration tests đạt.
-- [ ] Restart containers, xác nhận bản ghi còn tồn tại; mô phỏng migration lỗi và xác nhận API không khởi động mới với schema thiếu.
-- [ ] Commit: `feat: provision postgres and database migrations`.
+- [x] Viết integration tests khởi tạo schema từ DB trống, chạy lại không thay dữ liệu, unique/FK, rollback/reapply; xác nhận thất bại khi chưa có migration.
+- [x] Viết migration cho admin_users, admin_sessions, apps, releases, admin_api_tokens cùng constraint/index trong spec.
+- [x] Cấu hình migrate đợi PostgreSQL healthy, API đợi migrate exit 0; readiness truy vấn DB và schema version.
+- [x] Tạo môi trường test với DB/volume riêng; test không reset hoặc xóa DB ứng dụng.
+- [x] Chạy `docker compose -f backend/docker-compose.yml up --build -d`; readiness trả thành công. Chạy `npm run test:integration` tại backend; tất cả migration tests đạt.
+- [x] Restart containers, xác nhận bản ghi còn tồn tại; mô phỏng migration lỗi và xác nhận API không khởi động mới với schema thiếu.
+- [x] Commit: `feat: provision postgres and database migrations` (this task's commit).
 
 ## Task 3 — Xác thực và quản lý ứng dụng
 
