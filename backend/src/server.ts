@@ -4,7 +4,7 @@ import { createPool } from './db/pool.js';
 
 const config = loadConfig();
 const pool = createPool(config);
-const app = createApp({ pool });
+const app = createApp({ pool, config });
 const server = app.listen(config.port, '0.0.0.0', () => {
   console.info(`API listening on port ${config.port}`);
 });

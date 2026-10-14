@@ -24,7 +24,15 @@ Environment: macOS, Node.js 26.7.0, npm 11.19.0, Docker 29.7.2, Docker Compose 5
 - Failure-path Compose check: a temporary isolated project made the migration job exit 42. Compose left its API container `Created` and did not start it. The temporary stack and its volumes were removed.
 - PostgreSQL is not published on the host in the application stack. The test database binds only to `127.0.0.1:5433` and uses tmpfs.
 
+## 2026-10-15 — Admin authentication and app registry
+
+- Integration tests: 12 passed. Covered invalid/unauthenticated login, PostgreSQL session creation/expiry/logout, CSRF, origin/session cookie behavior, 10-attempt login limit, app validation/uniqueness, password hashing, and revoked API tokens.
+- Backend unit tests: 5 passed; typecheck and build passed.
+- Dependency audit: 0 vulnerabilities.
+- Rebuilt the production Docker image with the native Argon2 dependency; Compose API remained healthy and database readiness returned 200.
+- Interactive admin password prompt and token command were documented but not entered manually in the production container.
+
 ### Limits
 
-- Android installation/update flow and APK inspection tools are not implemented yet.
+- APK upload/download routes and Android installation/update flow are not implemented yet.
 - HTTPS reverse proxy, production VPS, external backup and restore have not been configured or verified.

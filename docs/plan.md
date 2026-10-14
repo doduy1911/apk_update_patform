@@ -61,10 +61,10 @@ Trạng thái: Chưa triển khai. Đường dẫn trong các task là tương �
 
 **Interfaces:** Các auth/apps endpoints trong spec; CLI `admin:create`, `token:create`, `token:revoke`. Session dùng cookie HttpOnly; production Secure; request thay đổi dữ liệu bằng cookie cần CSRF; token được băm và chỉ xuất raw lúc tạo.
 
-- [ ] Viết test chưa đăng nhập, sai mật khẩu, phiên hết hạn, logout, CSRF, token thu hồi và package trùng; chạy xác nhận thất bại trước triển khai.
-- [ ] Implement password hashing, session PostgreSQL, giới hạn thử login và token authentication cho upload; không hardcode admin mặc định.
-- [ ] Implement tạo/liệt kê app và validation package; unique constraint xử lý request đồng thời.
-- [ ] Chạy focused integration tests, `npm run typecheck`, `npm run build`; xác nhận không có credentials trong response/log thông thường.
+- [x] Viết test chưa đăng nhập, sai mật khẩu, phiên hết hạn, logout, CSRF, token thu hồi và package trùng; chạy xác nhận thất bại trước triển khai.
+- [x] Implement password hashing, session PostgreSQL, giới hạn thử login và token authentication cho upload; không hardcode admin mặc định.
+- [x] Implement tạo/liệt kê app và validation package; unique constraint xử lý request đồng thời.
+- [x] Chạy focused integration tests, `npm run typecheck`, `npm run build`; xác nhận không có credentials trong response/log thông thường.
 - [ ] Commit: `feat: add admin authentication and app registry`.
 
 ## Task 4 — Upload, kiểm tra và phát hành APK
