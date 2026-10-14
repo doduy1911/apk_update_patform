@@ -2,7 +2,7 @@
 
 Ngày: 2026-10-15
 
-Trạng thái: Bản thiết kế để review. Chưa triển khai backend, frontend hoặc tích hợp Android.
+Trạng thái: Đã triển khai bản đầu theo kế hoạch; xem [verification record](./verification.md) để biết phạm vi đã kiểm chứng và giới hạn còn lại.
 
 ## 1. Mục tiêu
 

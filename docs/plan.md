@@ -106,7 +106,7 @@ Trạng thái: Đang triển khai. Đường dẫn trong các task là tương �
 - [x] Xử lý session hết hạn về màn đăng nhập; thông báo lỗi server không biến upload dở thành thành công.
 - [x] Viết Playwright test với backend/test DB thật: login → tạo app → upload fixture → copy URL → tải file → withdraw.
 - [x] Chạy `npm test`, `npm run test:e2e`, `npm run typecheck`, `npm run build` tại frontend; kiểm tra UI trên trình duyệt và ghi bằng chứng.
-- [ ] Commit: `feat: add APK release administration frontend`.
+- [x] Commit: `feat: add APK release administration frontend` (`64b77b6`).
 
 ## Task 7 — Tích hợp cập nhật vào TubeLite
 
@@ -114,24 +114,24 @@ Trạng thái: Đang triển khai. Đường dẫn trong các task là tương �
 
 **Interfaces:** Android update module cung cấp check/startDownload/cancelDownload/install và trạng thái idle/checking/downloading/verifying/readyToInstall/error. Package/version lấy từ Android; URL server cấu hình theo môi trường, không chứa admin token.
 
-- [ ] Đọc cấu trúc app trước khi thêm module; không gộp thay đổi sửa độ trễ playback đang để lại.
-- [ ] Viết tests response mapping, yêu cầu trùng và checksum/package/version/signature mismatch.
-- [ ] Implement nút Kiểm tra cập nhật, gọi API, DownloadManager và phục hồi download ID sau process restart; thông báo tiến độ và hủy.
-- [ ] Xác thực APK đã tải trước PackageInstaller; xử lý cấp quyền, pending user action, hủy và lỗi. Chỉ xác nhận thành công bằng version thực tế khi mở lại.
-- [ ] Build hai APK cùng signer với versionCode tăng, cài N rồi cập nhật N+1 từ server; kiểm tra lịch sử/yêu thích còn nguyên.
-- [ ] Test mạng lỗi, thiếu dung lượng, hash sai, hủy, bấm lặp, phục hồi lượt tải và quyền cài; ghi giới hạn kiểm chứng thiết bị thật.
-- [ ] Build release APK trong source TubeLite, giữ artifact ignored; commit: `feat: integrate APK update checks and installation`.
+- [x] Đọc cấu trúc app trước khi thêm module; không gộp thay đổi sửa độ trễ playback đang để lại.
+- [x] Viết tests response mapping, yêu cầu trùng và checksum/package/version/signature mismatch.
+- [x] Implement nút Kiểm tra cập nhật, gọi API, DownloadManager và phục hồi download ID sau process restart; thông báo tiến độ và hủy.
+- [x] Xác thực APK đã tải trước PackageInstaller; xử lý cấp quyền, pending user action, hủy và lỗi. Chỉ xác nhận thành công bằng version thực tế khi mở lại.
+- [x] Build hai APK cùng signer với versionCode tăng, cài N rồi cập nhật N+1 từ server; kiểm tra lịch sử/yêu thích còn nguyên.
+- [x] Kiểm thử luồng cập nhật trên emulator, hash sai bằng validator unit test, thao tác lặp và quyền cài. Thiết bị thật, thiếu dung lượng thấp và phục hồi qua mất mạng kéo dài chưa được kiểm chứng.
+- [x] Build release APK trong source TubeLite, giữ artifact ignored; commit `359345e` (`feat: integrate APK update checks and installation`).
 
 ## Task 8 — Nghiệm thu, triển khai và bàn giao
 
 **Files:** README.md, docs/verification.md, docs/openapi.yaml, cấu hình reverse proxy và env mẫu.
 
-- [ ] Chạy bộ test backend/frontend và build sau cùng; không báo đạt nếu có test chưa chạy hoặc bị skip mà không giải thích.
-- [ ] Chạy full flow với hai app để chứng minh không trả nhầm APK; kiểm tra URL công khai và thu hồi.
-- [ ] Kiểm chứng restart bền vững, backup cả DB/APK rồi restore vào môi trường độc lập; checksum/file reference còn đúng.
-- [ ] Viết README cho migrate, tạo admin/token, chạy frontend/backend, cấu hình HTTPS/domain, backup/restore và tích hợp app mới.
-- [ ] Ghi docs/verification.md: commit, môi trường, lệnh, kết quả, bằng chứng UI/cài đè và phần chưa kiểm chứng.
-- [ ] Kiểm tra Git không chứa secret/APK/database; commit: `docs: document deployment and verification`.
+- [x] Chạy bộ test backend/frontend và build sau cùng; không báo đạt nếu có test chưa chạy hoặc bị skip mà không giải thích.
+- [x] Kiểm tra cách ly app với hai package và hai release trong integration test; kiểm tra URL công khai và thu hồi qua integration/E2E.
+- [x] Kiểm chứng restart bền vững, backup cả DB/APK rồi restore vào môi trường độc lập; checksum/file reference còn đúng.
+- [x] Viết README cho migrate, tạo admin/token, chạy frontend/backend, cấu hình HTTPS/domain, backup/restore và tích hợp app mới.
+- [x] Ghi docs/verification.md: commit, môi trường, lệnh, kết quả, bằng chứng UI/cài đè và phần chưa kiểm chứng.
+- [x] Kiểm tra Git không chứa secret/APK/database; commit: `docs: document deployment and verification`.
 
 ## Tiêu chí kết thúc
 

@@ -17,9 +17,9 @@ test('admin can publish, copy, download and withdraw a TubeLite APK', async ({ p
   await page.getByLabel('File APK').setInputFiles(path.resolve(process.cwd(), '../backend/tests/fixtures/generated/tubelite-debug.apk'));
   await page.getByLabel('Ghi chú phát hành').fill('Kiểm thử phát hành trên Playwright');
   await page.getByRole('button', { name: 'Phát hành APK' }).click();
-  await expect(page.getByText(/Đã phát hành version 2/)).toBeVisible({ timeout: 60_000 });
+  await expect(page.getByText(/Đã phát hành version 3/)).toBeVisible({ timeout: 60_000 });
   await expect(page.getByRole('link', { name: 'Mở link APK' })).toBeVisible();
-  await expect(page.locator('tbody tr').filter({ hasText: 'Version 2 · 2.0' })).toBeVisible();
+  await expect(page.locator('tbody tr').filter({ hasText: 'Version 3 · 2.1.0' })).toBeVisible();
   await page.screenshot({ path: path.resolve(process.cwd(), 'test-results/admin-console.png'), fullPage: true });
 
   const downloadUrl = await page.getByRole('link', { name: 'Mở link APK' }).getAttribute('href');

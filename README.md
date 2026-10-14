@@ -31,3 +31,45 @@ TEST_DATABASE_URL=postgres://apk_update_test:local_test_only@127.0.0.1:5433/apk_
 The test database uses a temporary filesystem and is separate from the application database.
 
 After the API is running, create the first administrator with `docker compose exec api npm run admin:create -- admin`; the password is entered with terminal echo disabled. Create a build upload token with `docker compose exec api npm run token:create -- admin "CI upload"`. Save the token when it is shown because it is displayed only once. Revoke it with `docker compose exec api npm run token:revoke -- <token-id>`.
+
+## Publish an app release
+
+Create an app in the administration console with its Android package name. Create an upload token, then upload a signed, full APK through the console or the authenticated upload API. The first valid APK pins the app's signing certificate; later releases must use the same signer and a higher, unused `versionCode`. Keep the upload token in your CI secret store. Never put it in an Android app. The public URL and release metadata are returned after the APK has been inspected and published.
+
+Android clients call `POST /api/v1/updates/check` with `packageName`, `currentVersionCode`, `sdkInt`, and `supportedAbis`. They can fetch the public APK URL from the response without an admin token. Verify the returned size, SHA-256, package, version and signing certificate on device before handing the APK to Android's installer. Android may require the user to approve installation.
+
+## Production HTTPS reverse proxy
+
+Terminate TLS at a maintained reverse proxy and serve the built frontend on the same origin as the API. Route `/api/` and `/health/` to the API, and route `/downloads/` to the API with HTTP Range support enabled. Set `PUBLIC_BASE_URL` to the public HTTPS origin, `ADMIN_ORIGIN` to the frontend origin, and `NODE_ENV=production`; use a long random `SESSION_SECRET` and unique database credentials. Keep PostgreSQL and port 3000 private; Compose binds the API to loopback by default. Configure the proxy's request body limit to match `MAX_APK_BYTES` (default 512 MiB) and its read/send timeouts for large APK transfers. An illustrative Nginx server block is in [`deploy/nginx.conf.example`](deploy/nginx.conf.example); add your certificate paths and domain before use.
+
+Do not expose the development Vite server or the PostgreSQL port publicly. Use a firewall and HTTPS certificate renewal for the chosen VPS. The example proxy assumes the frontend static files are served by Nginx and the API is reachable at `127.0.0.1:3000` on the same host.
+
+## Backup and restore
+
+Back up PostgreSQL and the APK volume together. Quiesce uploads during the backup so their snapshots describe the same point in time. From `backend/`, save the database dump and archive the named APK volume (the default Compose volume is `backend_apk_files`):
+
+```sh
+mkdir -p backups
+docker compose exec -T postgres sh -c 'pg_dump -U "$POSTGRES_USER" -d "$POSTGRES_DB" -Fc' > backups/apk-update.dump
+docker run --rm -v backend_apk_files:/data:ro -v "$PWD/backups:/backup" alpine:3.22 \
+  tar -czf /backup/apk-files.tar.gz -C /data .
+```
+
+Keep both files encrypted and access-controlled outside the VPS. To restore, stop the API, restore the APK archive to the APK volume, restore the dump into the matching PostgreSQL database, then start the stack and check readiness. For example, after creating an empty target database and volume:
+
+```sh
+docker compose stop api
+docker run --rm -v backend_apk_files:/data alpine:3.22 sh -c 'find /data -mindepth 1 -delete'
+docker run --rm -v backend_apk_files:/data -v "$PWD/backups:/backup:ro" alpine:3.22 \
+  sh -c 'tar -xzf /backup/apk-files.tar.gz -C /data'
+docker compose exec -T postgres sh -c 'pg_restore --clean --if-exists --no-owner -U "$POSTGRES_USER" -d "$POSTGRES_DB"' \
+  < backups/apk-update.dump
+docker compose up -d
+curl --fail http://127.0.0.1:3000/health/ready
+```
+
+Test restores in a separate environment before relying on them. Keep database and APK backups from the same maintenance window; a database reference without its APK makes that release unavailable.
+
+## Project records
+
+The reviewed requirements are in [`docs/spec.md`](docs/spec.md), implementation checklist in [`docs/plan.md`](docs/plan.md), and test/build/manual verification evidence in [`docs/verification.md`](docs/verification.md). This repository does not deploy to a public VPS; provide the domain, host and production secrets through your deployment environment when you are ready.
