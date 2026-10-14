@@ -93,7 +93,7 @@ Trạng thái: Đang triển khai. Đường dẫn trong các task là tương �
 - [x] Implement download theo release ID, MIME APK, Content-Length, HTTP Range/206/416; không public thư mục raw storage.
 - [x] Implement withdraw và kiểm tra trạng thái trên update/download; test client có version cao không bị downgrade.
 - [x] Chạy integration tests, backend build và kiểm tra cú pháp OpenAPI YAML; ghi request/response/error examples.
-- [ ] Commit: `feat: serve compatible APK updates and downloads`.
+- [x] Commit: `feat: serve compatible APK updates and downloads` (`25f9d6e`).
 
 ## Task 6 — Frontend quản trị
 
@@ -101,11 +101,11 @@ Trạng thái: Đang triển khai. Đường dẫn trong các task là tương �
 
 **Interfaces:** Dùng endpoints spec; cookie credentials và CSRF đúng origin. Upload dùng transport hỗ trợ progress. UI tiếng Việt.
 
-- [ ] Viết component tests cho empty/loading/error, disable submit lặp, progress upload và xác nhận thu hồi.
-- [ ] Implement đăng nhập, danh sách/tạo app, chi tiết release, upload có notes, sao chép URL và thu hồi.
-- [ ] Xử lý session hết hạn về màn đăng nhập; thông báo lỗi server không biến upload dở thành thành công.
-- [ ] Viết Playwright test với backend/test DB thật: login → tạo app → upload fixture → copy URL → tải file → withdraw.
-- [ ] Chạy `npm test`, `npm run test:e2e`, `npm run typecheck`, `npm run build` tại frontend; kiểm tra UI trên trình duyệt và ghi bằng chứng.
+- [x] Viết component tests cho empty/loading/error, disable submit lặp, progress upload và xác nhận thu hồi.
+- [x] Implement đăng nhập, danh sách/tạo app, chi tiết release, upload có notes, sao chép URL và thu hồi.
+- [x] Xử lý session hết hạn về màn đăng nhập; thông báo lỗi server không biến upload dở thành thành công.
+- [x] Viết Playwright test với backend/test DB thật: login → tạo app → upload fixture → copy URL → tải file → withdraw.
+- [x] Chạy `npm test`, `npm run test:e2e`, `npm run typecheck`, `npm run build` tại frontend; kiểm tra UI trên trình duyệt và ghi bằng chứng.
 - [ ] Commit: `feat: add APK release administration frontend`.
 
 ## Task 7 — Tích hợp cập nhật vào TubeLite

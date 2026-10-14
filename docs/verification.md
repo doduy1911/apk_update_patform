@@ -50,7 +50,15 @@ Environment: macOS, Node.js 26.7.0, npm 11.19.0, Docker 29.7.2, Docker Compose 5
 - Rebuilt the Compose backend image and verified `/health/ready` returned `ready`.
 - End-to-end Compose smoke test uploaded the real TubeLite APK (versionCode 2), checked an update from version 1, verified the SHA-256, downloaded bytes 0–63 with HTTP 206, confirmed version 2 is current, then withdrew the release and confirmed subsequent download returned 404. Temporary app, admin, token, release and APK file were removed.
 
+## 2026-10-15 — Frontend administration
+
+- Frontend component tests: 8 passed, covering session loading/expiry, login errors, empty and create app states, upload progress/repeat prevention/failure, and withdrawal confirmation.
+- Playwright end-to-end: 1 passed against the isolated PostgreSQL test database and API container. Logged in, created an app, uploaded a real 123 MB TubeLite debug APK fixture, copied its public URL, downloaded and checked APK bytes, withdrew the release, then confirmed the URL returned 404.
+- `npm run typecheck`, `npm run build`, and `npm audit --omit=dev` passed; production dependency audit found 0 vulnerabilities.
+- Screenshot of the management dashboard after publishing is available locally at ignored `frontend/test-results/admin-console.png`; it is excluded from Git with test artifacts.
+- Playwright teardown removed the API E2E container; shared development API/PostgreSQL and isolated PostgreSQL test service remain running.
+
 ### Limits
 
-- Administration frontend and Android installation/update flow are not implemented yet.
+- Android installation/update flow remains to be implemented and verified.
 - HTTPS reverse proxy, production VPS, external backup and restore have not been configured or verified.

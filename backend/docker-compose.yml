@@ -68,6 +68,37 @@ services:
       timeout: 2s
       retries: 30
 
+  api-e2e:
+    profiles: ["test"]
+    build:
+      context: .
+      target: runtime
+    restart: "no"
+    environment:
+      NODE_ENV: test
+      DATABASE_URL: postgres://apk_update_test:local_test_only@postgres-test:5432/apk_update_test
+      SESSION_SECRET: playwright-only-session-secret-with-32-characters
+      PUBLIC_BASE_URL: http://127.0.0.1:5174
+      APK_STORAGE_DIR: /data/apks
+      MAX_APK_BYTES: 536870912
+      ADMIN_ORIGIN: http://127.0.0.1:5174
+      PORT: 3100
+    ports:
+      - "127.0.0.1:3100:3100"
+    volumes:
+      - apk_files_test:/data/apks
+    command: ["sh", "-c", "node scripts/e2e-prepare.js && npm start"]
+    depends_on:
+      postgres-test:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3100/health/ready').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 10s
+
 volumes:
   postgres_data:
   apk_files:
+  apk_files_test:
