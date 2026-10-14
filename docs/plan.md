@@ -80,7 +80,7 @@ Trạng thái: Đang triển khai. Đường dẫn trong các task là tương �
 - [x] Publish bằng transaction với unique constraint và khóa app lúc thiết lập signer; chỉ trả thành công khi file sẵn sàng và DB commit xong.
 - [x] Dọn vùng tạm và file khi transaction rollback; lúc khởi động xóa upload tạm/orphan cũ hơn 24 giờ nhưng giữ file có DB reference. Integration test xác nhận không xóa upload mới hoặc release đã phát hành.
 - [x] Chạy release integration tests, build backend image và upload APK TubeLite qua API; nhận URL/metadata đúng.
-- [x] Commit: `feat: validate and publish APK releases`.
+- [x] Commit: `feat: validate and publish APK releases` (`099792d`).
 
 ## Task 5 — API kiểm tra cập nhật và tải công khai
 
@@ -88,11 +88,11 @@ Trạng thái: Đang triển khai. Đường dẫn trong các task là tương �
 
 **Interfaces:** Hợp đồng check/download/withdraw trong spec; latest = versionCode lớn nhất của published release tương thích SDK/ABI. Không yêu cầu app Android có token quản trị.
 
-- [ ] Viết tests thấp/bằng/cao hơn, hai app, không có release, SDK/ABI không khớp và package không tồn tại.
-- [ ] Implement chọn release và response chính xác; không dùng versionName hoặc uploadedAt để so sánh.
-- [ ] Implement download qua release ID, MIME APK, Content-Length, HTTP Range/206/416; không public thư mục raw storage.
-- [ ] Implement withdraw và kiểm tra trạng thái trên download. Test bản thu hồi không được đề nghị/tải mới, client đã có bản cao không bị yêu cầu downgrade.
-- [ ] Chạy focused integration tests và backend build; hoàn thiện OpenAPI với request/response/error examples.
+- [x] Viết tests version thấp/bằng/cao hơn, cách ly hai app, không có release, SDK/ABI không khớp và package không tồn tại.
+- [x] Implement chọn release và response chính xác; so sánh versionCode, không dùng versionName hoặc uploadedAt.
+- [x] Implement download theo release ID, MIME APK, Content-Length, HTTP Range/206/416; không public thư mục raw storage.
+- [x] Implement withdraw và kiểm tra trạng thái trên update/download; test client có version cao không bị downgrade.
+- [x] Chạy integration tests, backend build và kiểm tra cú pháp OpenAPI YAML; ghi request/response/error examples.
 - [ ] Commit: `feat: serve compatible APK updates and downloads`.
 
 ## Task 6 — Frontend quản trị

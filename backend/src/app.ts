@@ -6,8 +6,10 @@ import type { AppConfig } from './config.js';
 import { checkDatabaseReadiness } from './db/readiness.js';
 import { createAdminSessionMiddleware, createAuthRouter } from './auth/router.js';
 import { createAppsRouter } from './apps/router.js';
-import { createReleasesRouter } from './releases/router.js';
+import { createAdminReleasesRouter, createReleasesRouter } from './releases/router.js';
 import type { ApkMetadata } from './apk/inspect.js';
+import { createUpdatesRouter } from './updates/router.js';
+import { createDownloadsRouter } from './downloads/router.js';
 
 export function createApp(dependencies: { pool?: Pool; config?: AppConfig; inspectApk?: (path: string) => Promise<ApkMetadata> } = {}) {
   const app = express();
@@ -45,6 +47,9 @@ export function createApp(dependencies: { pool?: Pool; config?: AppConfig; inspe
     app.use('/api/v1/admin/auth', createAuthRouter(dependencies.pool, dependencies.config));
     app.use('/api/v1/admin/apps', createAppsRouter(dependencies.pool, dependencies.config));
     app.use('/api/v1/admin/apps', createReleasesRouter(dependencies.pool, dependencies.config, dependencies.inspectApk));
+    app.use('/api/v1/admin/releases', createAdminReleasesRouter(dependencies.pool, dependencies.config));
+    app.use('/api/v1/updates', createUpdatesRouter(dependencies.pool, dependencies.config));
+    app.use('/downloads', createDownloadsRouter(dependencies.pool, dependencies.config));
   }
   app.use((_request, response) => response.status(404).json({ error: { code: 'NOT_FOUND', message: 'Not found' } }));
   const errors: ErrorRequestHandler = (error: unknown, _request, response, _next) => {

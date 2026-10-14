@@ -1,0 +1,289 @@
+openapi: 3.1.0
+info:
+  title: APK Update Platform API
+  version: 1.0.0
+  description: Admin API for publishing APKs and public API for checking and downloading app updates.
+servers:
+  - url: https://updates.example.com
+    description: Replace with the deployed public origin.
+tags:
+  - name: Admin authentication
+  - name: Apps and releases
+  - name: Updates
+  - name: Downloads
+  - name: Health
+paths:
+  /health/live:
+    get:
+      tags: [Health]
+      summary: Process liveness
+      responses:
+        '200':
+          description: Process is running.
+  /health/ready:
+    get:
+      tags: [Health]
+      summary: Database and schema readiness
+      responses:
+        '200':
+          description: Database is reachable and migrations are current.
+        '503':
+          description: Database or schema is unavailable.
+  /api/v1/admin/auth/login:
+    post:
+      tags: [Admin authentication]
+      summary: Create an admin session
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [username, password]
+              properties:
+                username: { type: string }
+                password: { type: string, format: password }
+      responses:
+        '200':
+          description: Session cookie and CSRF token.
+          headers:
+            Set-Cookie:
+              schema: { type: string }
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  admin: { type: object, properties: { username: { type: string } } }
+                  csrfToken: { type: string }
+        '401': { description: Invalid username or password. }
+        '429': { description: Login rate limit reached. }
+  /api/v1/admin/auth/me:
+    get:
+      tags: [Admin authentication]
+      security: [{ AdminSession: [] }]
+      summary: Get current admin session
+      responses:
+        '200': { description: Current admin and CSRF token. }
+        '401': { description: No valid session. }
+  /api/v1/admin/auth/logout:
+    post:
+      tags: [Admin authentication]
+      security: [{ AdminSession: [] }]
+      parameters:
+        - $ref: '#/components/parameters/CsrfToken'
+      responses:
+        '204': { description: Session ended. }
+        '403': { description: Origin or CSRF check failed. }
+  /api/v1/admin/apps:
+    get:
+      tags: [Apps and releases]
+      security: [{ AdminSession: [] }]
+      summary: List registered apps
+      responses:
+        '200':
+          description: Registered applications.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  apps:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id: { type: string, format: uuid }
+                        name: { type: string }
+                        packageName: { type: string }
+                        signingCertSha256: { type: [string, 'null'] }
+    post:
+      tags: [Apps and releases]
+      security: [{ AdminSession: [] }]
+      parameters:
+        - $ref: '#/components/parameters/CsrfToken'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, packageName]
+              properties:
+                name: { type: string, maxLength: 120 }
+                packageName: { type: string, example: com.tubelite }
+      responses:
+        '201': { description: App registered. }
+        '400': { description: Invalid app information. }
+        '409': { description: Package already registered. }
+  /api/v1/admin/apps/{appId}/releases:
+    parameters:
+      - in: path
+        name: appId
+        required: true
+        schema: { type: string, format: uuid }
+    get:
+      tags: [Apps and releases]
+      security: [{ AdminSession: [] }]
+      summary: List releases for one app
+      responses:
+        '200': { description: Releases ordered by versionCode descending. }
+        '404': { description: App not found. }
+    post:
+      tags: [Apps and releases]
+      security:
+        - AdminSession: []
+        - AdminUploadToken: []
+      parameters:
+        - in: header
+          name: X-CSRF-Token
+          required: false
+          description: Required when using the admin session cookie; omitted for bearer upload tokens.
+          schema: { type: string }
+      summary: Validate and publish a full APK
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [apk]
+              properties:
+                apk: { type: string, format: binary }
+                releaseNotes: { type: string, maxLength: 4000 }
+      responses:
+        '201':
+          description: APK verified and published.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  release: { $ref: '#/components/schemas/Release' }
+                  downloadUrl: { type: string, format: uri }
+        '401': { description: Admin session or upload token is invalid. }
+        '409': { description: versionCode already published for this app. }
+        '413': { description: APK exceeds configured size limit. }
+        '422': { description: APK is invalid or package/signing certificate does not match. }
+  /api/v1/admin/releases/{releaseId}/withdraw:
+    post:
+      tags: [Apps and releases]
+      security: [{ AdminSession: [] }]
+      parameters:
+        - in: path
+          name: releaseId
+          required: true
+          schema: { type: string, format: uuid }
+        - $ref: '#/components/parameters/CsrfToken'
+      summary: Withdraw a published release
+      responses:
+        '204': { description: Release withdrawn; new downloads and update checks are blocked. }
+        '404': { description: Release not found. }
+  /api/v1/updates/check:
+    post:
+      tags: [Updates]
+      summary: Find the newest compatible release for an installed app
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [packageName, currentVersionCode, sdkInt, supportedAbis]
+              properties:
+                packageName: { type: string, example: com.tubelite }
+                currentVersionCode: { type: integer, minimum: 0 }
+                sdkInt: { type: integer, minimum: 1 }
+                supportedAbis:
+                  type: array
+                  items: { type: string, example: arm64-v8a }
+      responses:
+        '200':
+          description: Update available, current, or no compatible release.
+          content:
+            application/json:
+              examples:
+                updateAvailable:
+                  value:
+                    updateAvailable: true
+                    release:
+                      id: 5d455e25-e09a-41b7-9453-5eb8320ac338
+                      packageName: com.tubelite
+                      versionCode: 3
+                      versionName: 2.1.0
+                      releaseNotes: Fixes and improvements
+                      downloadUrl: https://updates.example.com/downloads/5d455e25-e09a-41b7-9453-5eb8320ac338/app.apk
+                      sizeBytes: 85000000
+                      sha256: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      signingCertSha256: bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+                upToDate:
+                  value: { updateAvailable: false, release: null, reason: UP_TO_DATE }
+                incompatible:
+                  value: { updateAvailable: false, release: null, reason: NO_COMPATIBLE_RELEASE }
+        '400': { description: Invalid device or version information. }
+        '404': { description: Package is not registered. }
+  /downloads/{releaseId}/app.apk:
+    get:
+      tags: [Downloads]
+      summary: Download one published APK
+      parameters:
+        - in: path
+          name: releaseId
+          required: true
+          schema: { type: string, format: uuid }
+        - in: header
+          name: Range
+          required: false
+          schema: { type: string, example: bytes=0-1048575 }
+      responses:
+        '200':
+          description: Full APK.
+          content:
+            application/vnd.android.package-archive:
+              schema: { type: string, format: binary }
+        '206':
+          description: Requested byte range.
+          headers:
+            Content-Range: { schema: { type: string } }
+            Accept-Ranges: { schema: { type: string, example: bytes } }
+          content:
+            application/vnd.android.package-archive:
+              schema: { type: string, format: binary }
+        '404': { description: Release is not published or does not exist. }
+        '410': { description: Stored APK is missing. }
+        '416':
+          description: Range is invalid or outside the file.
+          headers:
+            Content-Range: { schema: { type: string, example: 'bytes */85000000' } }
+components:
+  securitySchemes:
+    AdminSession:
+      type: apiKey
+      in: cookie
+      name: apk_update_admin.sid
+    AdminUploadToken:
+      type: http
+      scheme: bearer
+  parameters:
+    CsrfToken:
+      in: header
+      name: X-CSRF-Token
+      required: true
+      schema: { type: string }
+  schemas:
+    Release:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        appId: { type: string, format: uuid }
+        packageName: { type: string }
+        versionCode: { type: integer }
+        versionName: { type: string }
+        releaseNotes: { type: [string, 'null'] }
+        minSdk: { type: integer }
+        supportedAbis: { type: array, items: { type: string } }
+        sha256: { type: string, pattern: '^[0-9a-f]{64}$' }
+        signingCertSha256: { type: string, pattern: '^[0-9a-f]{64}$' }
+        sizeBytes: { type: integer }
+        status: { type: string, enum: [published, withdrawn] }
+        createdAt: { type: string, format: date-time }

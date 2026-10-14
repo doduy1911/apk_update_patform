@@ -42,7 +42,15 @@ Environment: macOS, Node.js 26.7.0, npm 11.19.0, Docker 29.7.2, Docker Compose 5
 - Uploaded the real 59,048,932-byte TubeLite release through the running Compose API using a temporary admin token. API returned HTTP 201 with matching package/version, checksum and stable download URL; test app, token, release and stored file were removed afterward.
 - Compose API readiness returned HTTP 200 after rebuild. Docker Compose printed a warning that the local buildx plugin is absent; its classic builder completed the image build.
 
+## 2026-10-15 — Compatible updates, release withdrawal and public downloads
+
+- Backend unit tests: 9 passed; typecheck and TypeScript build passed; dependency audit reported 0 vulnerabilities.
+- PostgreSQL integration tests: 25 passed across five files. Covered version selection, two-app isolation, current/newer client versions, SDK/ABI mismatch, unknown app, release history, CSRF-protected withdrawal, full download, closed/suffix/out-of-range HTTP Range requests and missing files.
+- `docs/openapi.yaml` parsed successfully with Ruby YAML.
+- Rebuilt the Compose backend image and verified `/health/ready` returned `ready`.
+- End-to-end Compose smoke test uploaded the real TubeLite APK (versionCode 2), checked an update from version 1, verified the SHA-256, downloaded bytes 0–63 with HTTP 206, confirmed version 2 is current, then withdrew the release and confirmed subsequent download returned 404. Temporary app, admin, token, release and APK file were removed.
+
 ### Limits
 
-- Public update-check/download routes, administration frontend and Android installation/update flow are not implemented yet.
+- Administration frontend and Android installation/update flow are not implemented yet.
 - HTTPS reverse proxy, production VPS, external backup and restore have not been configured or verified.

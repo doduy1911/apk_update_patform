@@ -24,6 +24,35 @@ export function createReleasesRouter(
   }).single('apk');
   const tokenAuth = requireAdminToken(pool);
 
+  router.get('/:appId/releases', requireAdmin, async (request, response, next) => {
+    const appId = request.params.appId;
+    if (typeof appId !== 'string' || !/^[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}$/i.test(appId)) {
+      response.status(400).json({ error: { code: 'INVALID_APP_ID', message: 'Mã ứng dụng không hợp lệ.' } });
+      return;
+    }
+    try {
+      const appExists = await pool.query('SELECT 1 FROM apps WHERE id=$1', [appId]);
+      if (appExists.rowCount === 0) {
+        response.status(404).json({ error: { code: 'APP_NOT_FOUND', message: 'Ứng dụng không tồn tại.' } });
+        return;
+      }
+      const { rows } = await pool.query(
+        `SELECT id, app_id AS "appId", version_code AS "versionCode", version_name AS "versionName",
+          release_notes AS "releaseNotes", min_sdk AS "minSdk", supported_abis AS "supportedAbis",
+          sha256, signing_cert_sha256 AS "signingCertSha256", file_size_bytes AS "sizeBytes",
+          status, created_at AS "createdAt"
+         FROM releases WHERE app_id=$1 ORDER BY version_code DESC, created_at DESC`, [appId],
+      );
+      response.json({ releases: rows.map((release) => ({
+        ...release,
+        versionCode: Number(release.versionCode),
+        sizeBytes: Number(release.sizeBytes),
+        signingCertSha256: release.signingCertSha256.trim(),
+        downloadUrl: `${config.publicBaseUrl}/downloads/${release.id}/app.apk`,
+      })) });
+    } catch (error) { next(error); }
+  });
+
   router.post('/:appId/releases', (request: Request, response: Response, next: NextFunction) => {
     const bearer = request.get('authorization')?.startsWith('Bearer ') ?? false;
     if (bearer) return tokenAuth(request, response, next);
@@ -77,6 +106,29 @@ export function createReleasesRouter(
     } finally {
       await rm(file.path, { force: true });
     }
+  });
+  return router;
+}
+
+export function createAdminReleasesRouter(pool: Pool, config: AppConfig) {
+  const router = Router();
+  router.post('/:releaseId/withdraw', requireAdmin, requireSameOrigin(config.adminOrigin), requireCsrf, async (request, response, next) => {
+    const releaseId = request.params.releaseId;
+    if (typeof releaseId !== 'string' || !/^[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}$/i.test(releaseId)) {
+      response.status(400).json({ error: { code: 'INVALID_RELEASE_ID', message: 'Mã bản phát hành không hợp lệ.' } });
+      return;
+    }
+    try {
+      const result = await pool.query("UPDATE releases SET status='withdrawn' WHERE id=$1 AND status='published' RETURNING id", [releaseId]);
+      if (result.rowCount === 0) {
+        const exists = await pool.query('SELECT 1 FROM releases WHERE id=$1', [releaseId]);
+        if (exists.rowCount === 0) {
+          response.status(404).json({ error: { code: 'RELEASE_NOT_FOUND', message: 'Bản phát hành không tồn tại.' } });
+          return;
+        }
+      }
+      response.status(204).end();
+    } catch (error) { next(error); }
   });
   return router;
 }
