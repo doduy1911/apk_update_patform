@@ -17,7 +17,7 @@ export async function createAdminToken(pool: Pool, adminUserId: string, name: st
 
 export async function getActiveAdminToken(pool: Pool, value: string) {
   const { rows } = await pool.query<{ id: string }>(
-    'SELECT id FROM admin_api_tokens WHERE token_hash=$1 AND revoked_at IS NULL',
+    'UPDATE admin_api_tokens SET last_used_at=now() WHERE token_hash=$1 AND revoked_at IS NULL RETURNING id',
     [hashToken(value)],
   );
   return rows[0]?.id ?? null;

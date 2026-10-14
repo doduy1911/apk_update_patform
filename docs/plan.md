@@ -10,7 +10,7 @@
 
 **Spec:** [spec.md](./spec.md)
 
-Trạng thái: Chưa triển khai. Đường dẫn trong các task là tương đối với `/Users/macbook/Documents/apk-update-platform/`, trừ phần tích hợp TubeLite.
+Trạng thái: Đang triển khai. Đường dẫn trong các task là tương đối với `/Users/macbook/Documents/apk-update-platform/`, trừ phần tích hợp TubeLite.
 
 ## Global Constraints
 
@@ -65,7 +65,7 @@ Trạng thái: Chưa triển khai. Đường dẫn trong các task là tương �
 - [x] Implement password hashing, session PostgreSQL, giới hạn thử login và token authentication cho upload; không hardcode admin mặc định.
 - [x] Implement tạo/liệt kê app và validation package; unique constraint xử lý request đồng thời.
 - [x] Chạy focused integration tests, `npm run typecheck`, `npm run build`; xác nhận không có credentials trong response/log thông thường.
-- [ ] Commit: `feat: add admin authentication and app registry`.
+- [x] Commit: `feat: add admin authentication and app registry` (`c1ce8f7`).
 
 ## Task 4 — Upload, kiểm tra và phát hành APK
 
@@ -73,14 +73,14 @@ Trạng thái: Chưa triển khai. Đường dẫn trong các task là tương �
 
 **Interfaces:** `inspectApk(path)` trả metadata/signing fingerprint; `publishRelease(appId, file, releaseNotes)` trả release và downloadUrl. Multipart fields `apk` và `releaseNotes`; route upload như spec.
 
-- [ ] Tạo APK fixtures bằng script test với package/version/chữ ký đã biết, lưu artifact sinh ra trong thư mục ignored; không commit APK hoặc khóa production.
-- [ ] Viết test file giả, split APK, sai package/chữ ký, oversize, upload ngắt, version trùng và concurrent first upload; kiểm tra thất bại trước implement.
-- [ ] Tích hợp Android SDK tools trong image backend để đọc manifest và `apksigner verify --print-certs`; subprocess dùng argument array và timeout.
-- [ ] Stream upload vào vùng tạm, tính SHA-256/kích thước, kiểm tra metadata và chữ ký; dùng storage key sinh bởi server.
-- [ ] Publish bằng transaction với unique constraint và khóa app lúc thiết lập signer; chỉ trả thành công khi file sẵn sàng và DB commit xong.
-- [ ] Thêm cleanup vùng tạm/orphan, không xóa upload đang hoạt động. Inject lỗi DB/ổ đĩa vào test để chứng minh không có release tải được trỏ đến file thiếu.
-- [ ] Chạy release integration tests, build backend image và upload fixture qua API; nhận URL/metadata đúng.
-- [ ] Commit: `feat: validate and publish APK releases`.
+- [x] Tạo APK fixtures bằng script `backend/tests/fixtures/generate.sh`; artifact sinh ra được ignored, không commit APK hoặc khóa production.
+- [x] Viết test file giả, split APK, sai package/chữ ký, oversize, version trùng, lỗi DB và concurrent first upload; xác nhận parser test đỏ trước implementation.
+- [x] Tích hợp Android SDK tools trong image backend để đọc manifest và `apksigner verify --print-certs`; subprocess dùng argument array và timeout.
+- [x] Stream upload vào vùng tạm, tính SHA-256/kích thước, kiểm tra metadata và chữ ký; dùng storage key sinh bởi server.
+- [x] Publish bằng transaction với unique constraint và khóa app lúc thiết lập signer; chỉ trả thành công khi file sẵn sàng và DB commit xong.
+- [x] Dọn vùng tạm và file khi transaction rollback; lúc khởi động xóa upload tạm/orphan cũ hơn 24 giờ nhưng giữ file có DB reference. Integration test xác nhận không xóa upload mới hoặc release đã phát hành.
+- [x] Chạy release integration tests, build backend image và upload APK TubeLite qua API; nhận URL/metadata đúng.
+- [x] Commit: `feat: validate and publish APK releases`.
 
 ## Task 5 — API kiểm tra cập nhật và tải công khai
 

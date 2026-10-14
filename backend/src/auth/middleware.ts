@@ -1,5 +1,7 @@
 import { timingSafeEqual, randomBytes } from 'node:crypto';
 import type { NextFunction, Request, Response } from 'express';
+import type { Pool } from 'pg';
+import { getActiveAdminToken } from './tokens.js';
 
 export function requireAdmin(request: Request, response: Response, next: NextFunction) {
   if (!request.session.adminId) {
@@ -7,6 +9,26 @@ export function requireAdmin(request: Request, response: Response, next: NextFun
     return;
   }
   next();
+}
+
+export function requireAdminToken(pool: Pool) {
+  return async (request: Request, response: Response, next: NextFunction) => {
+    const authorization = request.get('authorization') ?? '';
+    const match = /^Bearer ([A-Za-z0-9_-]{32,})$/.exec(authorization);
+    if (!match) {
+      response.status(401).json({ error: { code: 'INVALID_ADMIN_TOKEN', message: 'Cần token quản trị hợp lệ.' } });
+      return;
+    }
+    try {
+      const tokenId = await getActiveAdminToken(pool, match[1]!);
+      if (!tokenId) {
+        response.status(401).json({ error: { code: 'INVALID_ADMIN_TOKEN', message: 'Cần token quản trị hợp lệ.' } });
+        return;
+      }
+      response.locals.adminTokenId = tokenId;
+      next();
+    } catch (error) { next(error); }
+  };
 }
 
 export function requireSameOrigin(expectedOrigin: string) {

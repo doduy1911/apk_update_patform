@@ -32,7 +32,17 @@ Environment: macOS, Node.js 26.7.0, npm 11.19.0, Docker 29.7.2, Docker Compose 5
 - Rebuilt the production Docker image with the native Argon2 dependency; Compose API remained healthy and database readiness returned 200.
 - Interactive admin password prompt and token command were documented but not entered manually in the production container.
 
+## 2026-10-15 — APK validation and release publishing
+
+- Backend unit tests: 7 passed; TypeScript check and build passed; `npm audit --audit-level=moderate` reported 0 vulnerabilities.
+- PostgreSQL integration tests: 19 passed. Release coverage includes bearer and cookie/CSRF authentication, revoked token, invalid APK, upload size limit, package and signing-certificate mismatch, duplicate version, concurrent first signer setup, stable file/URL metadata, database rollback cleanup, and stale artifact cleanup that preserves active and published files.
+- `backend/tests/fixtures/generate.sh` successfully built and copied an ignored TubeLite debug APK fixture; no APK or signing key was added to Git.
+- Built the production Docker image with pinned Android command-line tools revision `15859902` (SHA-256 checked), Android platform 35 and Build Tools 35.0.0. `apkanalyzer` and `apksigner` ran in the ARM64 container.
+- Real APK inspection returned package `com.tubelite`, versionCode `2`, versionName `2.0`, minSdk `26`, four ABI entries and a 64-character signing certificate SHA-256.
+- Uploaded the real 59,048,932-byte TubeLite release through the running Compose API using a temporary admin token. API returned HTTP 201 with matching package/version, checksum and stable download URL; test app, token, release and stored file were removed afterward.
+- Compose API readiness returned HTTP 200 after rebuild. Docker Compose printed a warning that the local buildx plugin is absent; its classic builder completed the image build.
+
 ### Limits
 
-- APK upload/download routes and Android installation/update flow are not implemented yet.
+- Public update-check/download routes, administration frontend and Android installation/update flow are not implemented yet.
 - HTTPS reverse proxy, production VPS, external backup and restore have not been configured or verified.

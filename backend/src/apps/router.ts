@@ -11,8 +11,7 @@ const appSchema = z.object({
 
 export function createAppsRouter(pool: Pool, config: AppConfig) {
   const router = Router();
-  router.use(requireAdmin);
-  router.get('/', async (_request, response, next) => {
+  router.get('/', requireAdmin, async (_request, response, next) => {
     try {
       const { rows } = await pool.query(
         `SELECT id, name, package_name AS "packageName", signing_cert_sha256 AS "signingCertSha256",
@@ -21,7 +20,7 @@ export function createAppsRouter(pool: Pool, config: AppConfig) {
       response.json({ apps: rows });
     } catch (error) { next(error); }
   });
-  router.post('/', requireSameOrigin(config.adminOrigin), requireCsrf, async (request, response, next) => {
+  router.post('/', requireAdmin, requireSameOrigin(config.adminOrigin), requireCsrf, async (request, response, next) => {
     const parsed = appSchema.safeParse(request.body);
     if (!parsed.success) {
       response.status(400).json({ error: { code: 'INVALID_APP', message: 'Tên hoặc package ứng dụng không hợp lệ.' } });

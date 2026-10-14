@@ -6,8 +6,10 @@ import type { AppConfig } from './config.js';
 import { checkDatabaseReadiness } from './db/readiness.js';
 import { createAdminSessionMiddleware, createAuthRouter } from './auth/router.js';
 import { createAppsRouter } from './apps/router.js';
+import { createReleasesRouter } from './releases/router.js';
+import type { ApkMetadata } from './apk/inspect.js';
 
-export function createApp(dependencies: { pool?: Pool; config?: AppConfig } = {}) {
+export function createApp(dependencies: { pool?: Pool; config?: AppConfig; inspectApk?: (path: string) => Promise<ApkMetadata> } = {}) {
   const app = express();
   app.disable('x-powered-by');
   if (dependencies.config?.nodeEnv === 'production') app.set('trust proxy', 1);
@@ -42,6 +44,7 @@ export function createApp(dependencies: { pool?: Pool; config?: AppConfig } = {}
     app.use('/api/v1/admin', createAdminSessionMiddleware(dependencies.pool, dependencies.config));
     app.use('/api/v1/admin/auth', createAuthRouter(dependencies.pool, dependencies.config));
     app.use('/api/v1/admin/apps', createAppsRouter(dependencies.pool, dependencies.config));
+    app.use('/api/v1/admin/apps', createReleasesRouter(dependencies.pool, dependencies.config, dependencies.inspectApk));
   }
   app.use((_request, response) => response.status(404).json({ error: { code: 'NOT_FOUND', message: 'Not found' } }));
   const errors: ErrorRequestHandler = (error: unknown, _request, response, _next) => {
