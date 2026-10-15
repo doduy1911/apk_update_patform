@@ -30,7 +30,7 @@ TEST_DATABASE_URL=postgres://apk_update_test:local_test_only@127.0.0.1:5433/apk_
 
 The test database uses a temporary filesystem and is separate from the application database.
 
-After the API is running, create the first administrator with `docker compose exec api npm run admin:create -- admin`; the password is entered with terminal echo disabled. Create a build upload token with `docker compose exec api npm run token:create -- admin "CI upload"`. Save the token when it is shown because it is displayed only once. Revoke it with `docker compose exec api npm run token:revoke -- <token-id>`.
+After the API is running, create the first administrator with `docker compose exec api node dist/cli/admin-create.js admin`; the password is entered with terminal echo disabled. Create a build upload token with `docker compose exec api node dist/cli/token-create.js admin "CI upload"`. Save the token when it is shown because it is displayed only once. Revoke it with `docker compose exec api node dist/cli/token-revoke.js <token-id>`.
 
 ## Publish an app release
 
