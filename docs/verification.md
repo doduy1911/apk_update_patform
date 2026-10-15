@@ -78,6 +78,12 @@ Environment: macOS, Node.js 26.7.0, npm 11.19.0, Docker 29.7.2, Docker Compose 5
 - Added production HTTPS reverse-proxy example and documented environment setup, release publishing, client integration, backup/restore, and verification links. The proxy has not been configured with a real domain/certificate and no VPS deployment or external backup target was tested.
 - TubeLite release artifact uses the project's local debug signing key for emulator verification. Production signing requires a dedicated stable keystore and HTTPS deployment configuration.
 
+## 2026-10-15 — PostgreSQL restart resilience
+
+- Reproduced the uncaught `pg.Pool` error when PostgreSQL terminated idle client connections with SQLSTATE `57P01` during restart. Added a pool error listener that logs only the error code and allows the process to continue.
+- Regression test `src/db/pool.test.ts` failed before the listener was added and passed afterward.
+- Rebuilt and recreated the Compose API image, restarted PostgreSQL, then verified API readiness returned `ready`, the API container remained running with restart count `0`, and the log recorded `Unexpected PostgreSQL pool client error { code: '57P01' }` without a stack trace or process exit.
+
 ### Limits
 
 - Physical-device and failure-condition Android checks (severe low disk, long network interruption/process recovery) have not been verified.
