@@ -84,6 +84,12 @@ Environment: macOS, Node.js 26.7.0, npm 11.19.0, Docker 29.7.2, Docker Compose 5
 - Regression test `src/db/pool.test.ts` failed before the listener was added and passed afterward.
 - Rebuilt and recreated the Compose API image, restarted PostgreSQL, then verified API readiness returned `ready`, the API container remained running with restart count `0`, and the log recorded `Unexpected PostgreSQL pool client error { code: '57P01' }` without a stack trace or process exit.
 
+## 2026-10-15 — Hidden admin password prompt
+
+- Confirmed the admin creation prompt could append CR/LF when the terminal delivered password and Enter in the same input chunk; the stored hash matched the password with a trailing line feed but not the exact password entered.
+- Extracted the prompt into a testable helper and fixed it to process terminal input character-by-character with UTF-8 chunk decoding. Regression test failed before the fix and passed after it.
+- Rebuilt/recreated the API image and reset the existing `admin` password hash to the exact user-provided password through the corrected hidden prompt. Hash verification confirms the exact password matches and the line-feed variant does not. No password or hash is logged.
+
 ### Limits
 
 - Physical-device and failure-condition Android checks (severe low disk, long network interruption/process recovery) have not been verified.
