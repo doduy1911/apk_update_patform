@@ -10,10 +10,12 @@ import { createAdminReleasesRouter, createReleasesRouter } from './releases/rout
 import type { ApkMetadata } from './apk/inspect.js';
 import { createUpdatesRouter } from './updates/router.js';
 import { createDownloadsRouter } from './downloads/router.js';
+import { requestLoggingMiddleware } from './request-logging.js';
 
 export function createApp(dependencies: { pool?: Pool; config?: AppConfig; inspectApk?: (path: string) => Promise<ApkMetadata> } = {}) {
   const app = express();
   app.disable('x-powered-by');
+  app.use(requestLoggingMiddleware);
   if (dependencies.config?.nodeEnv === 'production') app.set('trust proxy', 1);
   app.use(helmet());
   if (dependencies.config) {
@@ -53,7 +55,7 @@ export function createApp(dependencies: { pool?: Pool; config?: AppConfig; inspe
   }
   app.use((_request, response) => response.status(404).json({ error: { code: 'NOT_FOUND', message: 'Not found' } }));
   const errors: ErrorRequestHandler = (error: unknown, _request, response, _next) => {
-    console.error('Unhandled request error', error);
+    console.error('Unhandled request error', { requestId: response.locals.requestId }, error);
     response.status(500).json({ error: { code: 'INTERNAL_ERROR', message: 'Internal server error' } });
   };
   app.use(errors);
