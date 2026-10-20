@@ -8,7 +8,7 @@ export default defineConfig(({ mode }) => {
   return {
     plugins: [react()],
     server: {
-      allowedHosts: ['apk_platform.doduy.site'],
+      allowedHosts: ['apk-platform.doduy.site'],
       proxy: {
         '/api': { target: apiTarget, changeOrigin: true },
         '/downloads': { target: apiTarget, changeOrigin: true },
