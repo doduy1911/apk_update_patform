@@ -7,15 +7,15 @@
     "node": ">=22.11.0"
   },
   "scripts": {
-    "dev": "tsx watch src/server.ts",
+    "dev": "node --env-file=.env ./node_modules/tsx/dist/cli.mjs watch src/server.ts",
     "start": "node dist/server.js",
     "build": "tsc -p tsconfig.json",
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "test": "vitest run src",
     "test:watch": "vitest",
     "test:integration": "vitest run --config vitest.integration.config.ts",
-    "db:migrate": "node-pg-migrate --migrations-dir migrations --migrations-table schema_migrations up",
-    "db:rollback": "node-pg-migrate --migrations-dir migrations --migrations-table schema_migrations down",
+    "db:migrate": "node --env-file=.env ./node_modules/node-pg-migrate/bin/node-pg-migrate.js --migrations-dir migrations --migrations-table schema_migrations up",
+    "db:rollback": "node --env-file=.env ./node_modules/node-pg-migrate/bin/node-pg-migrate.js --migrations-dir migrations --migrations-table schema_migrations down",
     "admin:create": "tsx src/cli/admin-create.ts",
     "token:create": "tsx src/cli/token-create.ts",
     "token:revoke": "tsx src/cli/token-revoke.ts"
