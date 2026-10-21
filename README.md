@@ -61,6 +61,22 @@ sudo systemctl status apk-update-api
 
 View logs with `sudo journalctl -u apk-update-api -f`. After deploying new code, rebuild and restart with `npm run build` and `sudo systemctl restart apk-update-api`. The service reads `backend/.env` at startup; it will exit if required settings are missing or PostgreSQL is unavailable.
 
+## Run the frontend with systemd
+
+The frontend unit at [`deploy/apk-update-frontend.service.example`](deploy/apk-update-frontend.service.example) serves the production build on `127.0.0.1:4173`. Build it and install the unit:
+
+```sh
+cd ~/apk_update_patform/frontend
+npm ci
+npm run build
+sudo cp ../deploy/apk-update-frontend.service.example /etc/systemd/system/apk-update-frontend.service
+sudo systemctl daemon-reload
+sudo systemctl enable --now apk-update-frontend
+sudo systemctl status apk-update-frontend
+```
+
+The Nginx example proxies frontend requests to this service and continues to route API and download requests to the backend. Install it with your TLS certificate and domain configured. View frontend logs with `sudo journalctl -u apk-update-frontend -f`. After deploying new frontend code, run `npm run build` and `sudo systemctl restart apk-update-frontend`.
+
 ## Backup and restore
 
 Back up PostgreSQL and the APK volume together. Quiesce uploads during the backup so their snapshots describe the same point in time. From `backend/`, save the database dump and archive the named APK volume (the default Compose volume is `backend_apk_files`):
