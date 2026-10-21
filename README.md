@@ -63,7 +63,7 @@ View logs with `sudo journalctl -u apk-update-api -f`. After deploying new code,
 
 ## Run the frontend with systemd
 
-The frontend unit at [`deploy/apk-update-frontend.service.example`](deploy/apk-update-frontend.service.example) serves the production build on `127.0.0.1:4173`. Build it and install the unit:
+The frontend unit at [`deploy/apk-update-frontend.service.example`](deploy/apk-update-frontend.service.example) serves the production build on `127.0.0.1:5173`. Build it and install the unit:
 
 ```sh
 cd ~/apk_update_patform/frontend
