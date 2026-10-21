@@ -44,6 +44,23 @@ Terminate TLS at a maintained reverse proxy and serve the built frontend on the 
 
 Do not expose the development Vite server or the PostgreSQL port publicly. Use a firewall and HTTPS certificate renewal for the chosen VPS. The example proxy assumes the frontend static files are served by Nginx and the API is reachable at `127.0.0.1:3000` on the same host.
 
+## Run the API with systemd
+
+The example unit at [`deploy/apk-update-api.service.example`](deploy/apk-update-api.service.example) runs the built backend as the `ubuntu` user from `/home/ubuntu/apk_update_patform/backend`. Adjust `User`, `Group`, and `WorkingDirectory` if your server uses a different account or install path. Ensure `backend/.env` is configured and `APK_STORAGE_DIR` is writable by that user. Then install and start the unit:
+
+```sh
+cd ~/apk_update_patform/backend
+npm ci
+npm run build
+mkdir -p data/apks
+sudo cp ../deploy/apk-update-api.service.example /etc/systemd/system/apk-update-api.service
+sudo systemctl daemon-reload
+sudo systemctl enable --now apk-update-api
+sudo systemctl status apk-update-api
+```
+
+View logs with `sudo journalctl -u apk-update-api -f`. After deploying new code, rebuild and restart with `npm run build` and `sudo systemctl restart apk-update-api`. The service reads `backend/.env` at startup; it will exit if required settings are missing or PostgreSQL is unavailable.
+
 ## Backup and restore
 
 Back up PostgreSQL and the APK volume together. Quiesce uploads during the backup so their snapshots describe the same point in time. From `backend/`, save the database dump and archive the named APK volume (the default Compose volume is `backend_apk_files`):
