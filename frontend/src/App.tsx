@@ -206,7 +206,7 @@ export default function App() {
             <label className="field-label" htmlFor="new-app-name">Tên ứng dụng</label>
             <input id="new-app-name" value={appName} onChange={(event) => setAppName(event.target.value)} required maxLength={120} placeholder="TubeLite" />
             <label className="field-label" htmlFor="new-app-package">Package name</label>
-            <input id="new-app-package" value={packageName} onChange={(event) => setPackageName(event.target.value)} required placeholder="com.example.app" pattern="[A-Za-z][A-Za-z0-9_]*(\.[A-Za-z][A-Za-z0-9_]*)+" />
+            <input id="new-app-package" value={packageName} onChange={(event) => setPackageName(event.target.value)} required placeholder="com.example.app" pattern="[A-Za-z][A-Za-z0-9_]*([.][A-Za-z][A-Za-z0-9_]*)+" />
             <div className="form-actions"><button type="button" className="button text-button" onClick={() => setShowAppForm(false)}>Hủy</button><button className="button primary" type="submit" disabled={isSubmitting}>{isSubmitting ? 'Đang lưu…' : 'Lưu ứng dụng'}</button></div>
           </form>}
 
